@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel - Library Management</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .export-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            padding: 10px 15px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+        .export-btn:hover {
+            background-color: #a04557;
+        }
+
+        .logout-btn {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            padding: 10px 15px;
+            background-color: #f44336;
+            color: white;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+        .logout-btn:hover {
+            background-color: #d32f2f;
+        }
+
+        button {
+            padding: 10px 15px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+        button:hover {
+            background-color: #1c511f;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📚 Admin Panel</h1>
+        <button class="logout-btn" onclick="logout()">Logout</button>
+        <button class="export-btn" onclick="exportToExcel()">📤 Export to Excel</button>
+        <h6></h6>
+        <h6></h6>
+        <h2>Add a New Book</h2>
+        <input type="text" id="title" placeholder="Title">
+        <input type="text" id="author" placeholder="Author">
+        <input type="text" id="isbn" placeholder="ISBN">
+        <input type="number" id="price" placeholder="Price">
+        <h6></h6>
+        <input type="text" id="genre" placeholder="Genre">
+        <h6></h6>
+        <button onclick="addBook()">Add Book</button>
+        <h6>--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------</h6>
+
+        <h2>Manage Books</h2>
+        <input type="text" id="search" placeholder="Search by Title, Author, or ISBN" onkeyup="filterBooks()">
+
+        <h3>Advanced Filters</h3>
+        <select id="genreFilter" onchange="filterBooks()">
+            <option value="">All Genres</option>
+        </select>
+        <input type="number" id="minPrice" placeholder="Min Price" onkeyup="filterBooks()">
+        <input type="number" id="maxPrice" placeholder="Max Price" onkeyup="filterBooks()">
+        <h6>--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------</h6>
+
+        <h2>Book List</h2>
+        <table id="book-table">
+            <thead>
+                <tr>
+                    <th>Title</th>
+                    <th>Author</th>
+                    <th>ISBN</th>
+                    <th>Price</th>
+                    <th>Genre</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+
+    <script>
+        let books = JSON.parse(localStorage.getItem("books")) || [];
+
+        function addBook() {
+            const title = document.getElementById("title").value;
+            const author = document.getElementById("author").value;
+            const isbn = document.getElementById("isbn").value;
+            const price = document.getElementById("price").value;
+            const genre = document.getElementById("genre").value;
+
+
+            if (!title || !author || !isbn || !price || !genre) {
+                alert("Please fill all fields!");
+                return;
+            }
+
+            books.push({ title, author, isbn, price, genre });
+            localStorage.setItem("books", JSON.stringify(books));
+            document.getElementById("title").value = "";
+            document.getElementById("author").value = "";
+            document.getElementById("isbn").value = "";
+            document.getElementById("price").value = "";
+            document.getElementById("genre").value = "";
+
+            displayBooks();
+        }
+
+        function filterBooks() {
+            const searchText = document.getElementById("search").value.toLowerCase();
+            const selectedGenre = document.getElementById("genreFilter").value.toLowerCase();
+            const minPrice = parseFloat(document.getElementById("minPrice").value) || 0;
+            const maxPrice = parseFloat(document.getElementById("maxPrice").value) || Number.MAX_VALUE;
+
+            const filteredBooks = books.filter(book => {
+                return (
+                    (book.title.toLowerCase().includes(searchText) ||
+                    book.author.toLowerCase().includes(searchText) ||
+                    book.isbn.toLowerCase().includes(searchText)) &&
+                    (selectedGenre === "" || book.genre.toLowerCase() === selectedGenre) &&
+                    (parseFloat(book.price) >= minPrice && parseFloat(book.price) <= maxPrice)
+                );
+            });
+            displayBooks(filteredBooks);
+        }
+
+        function displayBooks(bookList = books) {
+            const tbody = document.querySelector("#book-table tbody");
+            tbody.innerHTML = "";
+            bookList.forEach((book, index) => {
+                tbody.innerHTML += `
+                    <tr>
+                        <td>${book.title}</td>
+                        <td>${book.author}</td>
+                        <td>${book.isbn}</td>
+                        <td>${book.price}</td>
+                        <td>${book.genre}</td>
+                        <td>
+                            <button onclick="deleteBook(${index})">🗑️ Delete</button>
+                        </td>
+                    </tr>
+                `;
+            });
+            updateGenreFilter();
+        }
+
+        function updateGenreFilter() {
+            const genreFilter = document.getElementById("genreFilter");
+            const genres = [...new Set(books.map(book => book.genre))];
+            genreFilter.innerHTML = `<option value="">All Genres</option>`;
+            genres.forEach(genre => {
+                genreFilter.innerHTML += `<option value="${genre}">${genre}</option>`;
+            });
+        }
+
+        function deleteBook(index) {
+            books.splice(index, 1);
+            localStorage.setItem("books", JSON.stringify(books));
+            displayBooks();
+        }
+
+        function exportToExcel() {
+            const ws = XLSX.utils.json_to_sheet(books);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "Books");
+            XLSX.writeFile(wb, "Library_Books.xlsx");
+        }
+
+        function logout() {
+            localStorage.removeItem("loggedIn");
+            localStorage.removeItem("role");
+            window.location.href = "login.html";
+        }
+
+        displayBooks();
+    </script>
+</body>
+</html>

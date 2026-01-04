@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Transactions</title>
+    <style>
+        body {
+            background-color: #222;
+            color: white;
+            font-family: Arial, sans-serif;
+            text-align: center;
+        }
+        table {
+            width: 80%;
+            margin: 20px auto;
+            border-collapse: collapse;
+        }
+        th, td {
+            padding: 10px;
+            border: 1px solid white;
+            text-align: center;
+        }
+        th {
+            background-color: green;
+        }
+        td {
+            background-color: #333;
+        }
+        button {
+            background-color: red;
+            color: white;
+            padding: 10px;
+            border: none;
+            cursor: pointer;
+        }
+        button {
+        background-color: rgb(163, 22, 22);
+        color: white;
+        padding: 12px 20px;
+        border: black;
+        cursor: pointer;
+        font-size: 16px;
+        transition: background-color 0.3s ease, transform 0.2s ease;
+        border-radius: 8px;
+        font-weight: bold;
+    }
+
+    button:hover { 
+        background-color: rgb(238, 63, 63);
+        transform: scale(1.1);
+    }
+    </style>
+</head>
+<body>
+    <h2>📜 Transactions</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Book Name</th>
+                <th>Author</th>
+                <th>ISBN</th>
+                <th>Price</th>
+                <th>Username</th>
+            </tr>
+        </thead>
+        <tbody id="transactionsTable"></tbody>
+    </table>
+    <button onclick="window.location.href='admin.html'">⬅️ Back to Admin Panel</button>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            let transactionsTable = document.getElementById("transactionsTable");
+            let transactions = JSON.parse(localStorage.getItem("transactions")) || [];
+    
+            transactionsTable.innerHTML = ""; 
+    
+            if (transactions.length === 0) {
+                transactionsTable.innerHTML = "<tr><td colspan='5'>No transactions found.</td></tr>";
+                return;
+            }
+    
+            transactions.forEach(transaction => {
+                let row = `
+                    <tr>
+                        <td>${transaction.title || "N/A"}</td>
+                        <td>${transaction.author || "N/A"}</td>
+                        <td>${transaction.isbn || "N/A"}</td>
+                        <td>₹${transaction.price || "N/A"}</td>
+                        <td>${transaction.username || "Guest"}</td>
+                    </tr>
+                `;
+                transactionsTable.innerHTML += row;
+            });
+        });
+    </script>    
+    
+</body>
+</html>

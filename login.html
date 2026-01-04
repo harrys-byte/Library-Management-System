@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Library Management</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>🔑 Login to Library Management</h1>
+        <form onsubmit="return loginUser()">
+            <input type="text" id="login-username" placeholder="Username" required>
+            <input type="password" id="login-password" placeholder="Password" required>
+            <button type="submit">Login</button>
+        </form>
+        <p id="login-error-msg"></p>
+        <p>Don't have an account? <a href="register.html">Create one</a></p>
+        <p><a href="forgot-password.html">Forgot Password?</a></p>
+    </div>
+
+    <script>
+        function loginUser() {
+            const username = document.getElementById("login-username").value;
+            const password = document.getElementById("login-password").value;
+    
+            const storedData = localStorage.getItem(username);
+            if (!storedData) {
+                document.getElementById("login-error-msg").innerText = "User not found!";
+                return false;
+            }
+    
+            const { password: storedPass, role } = JSON.parse(storedData);
+            if (password === storedPass) {
+                localStorage.setItem("loggedIn", "true");
+                localStorage.setItem("role", role);
+    
+                if (role === "admin") {
+                    window.location.href = "admin.html"; // Admin Dashboard
+                } else {
+                    window.location.href = "index.html"; // User Dashboard
+                }
+            } else {
+                document.getElementById("login-error-msg").innerText = "Invalid Password!";
+            }
+            return false;
+        }
+    </script>
+    
+</body>
+</html>

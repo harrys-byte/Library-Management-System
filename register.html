@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register - Library Management</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>📝 Create an Account</h1>
+        
+        <form onsubmit="return registerUser()">
+            <input type="text" id="register-username" placeholder="Choose a Username" required>
+            <input type="password" id="register-password" placeholder="Choose a Password" required>
+            <select id="register-role">
+                <option value="user">User</option>
+                <option value="admin">Admin</option>
+            </select>
+            <button type="submit">Register</button>
+        </form>
+        
+        <p id="register-success-msg"></p>
+        <p>Already have an account? <a href="login.html">Login here</a></p>
+    </div>
+
+    <script>
+        function registerUser() {
+            const username = document.getElementById("register-username").value;
+            const password = document.getElementById("register-password").value;
+            const role = document.getElementById("register-role").value;
+    
+            localStorage.setItem(username, JSON.stringify({ password, role }));
+    
+            document.getElementById("register-success-msg").innerText = "Account created successfully!";
+            return false;
+        }
+    </script>
+    
+</body>
+</html>
